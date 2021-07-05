@@ -1,0 +1,236 @@
+{% extends "wall/base.html" %}
+{% block content %}
+{{ room_name|json_script:"room-name" }}
+{{ sender.username|json_script:"sender" }}
+{{ receiver.username|json_script:"receiver" }}
+
+
+<div class="container_msg">
+    <div class="messaging">
+        <div class="inbox_msg">
+            <div class="inbox_people mobile-hidden">
+                <div class="headind_srch">
+                    <div class="recent_heading">
+                        <h4>Recent</h4>
+                    </div>
+                    <div class="srch_bar">
+                        <div class="stylish-input-group">
+                            <input type="text" class="search-bar"  placeholder="Search" >
+                            <span class="input-group-addon">
+                <button type="button"> <i class="fa fa-search" aria-hidden="true"></i> </button>
+                </span> </div>
+                    </div>
+                </div>
+                <div class="inbox_chat">
+                    {% for active_channel in user_active_channels %}
+
+                        {% if active_channel.User1 == request.user and active_channel.last_message != None %}
+                            <a href="{% url 'room' active_channel.channel_name %}">
+                                {% if active_channel.channel_name == channel_name %}
+
+                                <div class="chat_list active_chat" id="chat-{{ active_channel.channel_name }}">
+                                {% elif active_channel.last_message_author != request.user and active_channel.read == False %}
+                                    <div class="chat_list new_message_chat" id="chat-{{ active_channel.channel_name }}">
+                                {% else %}
+                                        <div class="chat_list" id="chat-{{ active_channel.channel_name }}">
+                                {% endif %}
+                                <div class="chat_people">
+                                    <div class="chat_img"> <img class="img_msg" src="{{ active_channel.User2.profile.profile_picture.url }}"> </div>
+                                    <div class="chat_ib">
+                                        <h5>{{ active_channel.User2 }}
+                                            <span class="chat_date" id="last-time-{{ active_channel.channel_name }}">
+                                                {% if active_channel.last_message_date %}
+                                                {{ active_channel.last_message_date }}
+                                                {% endif %}
+                                            </span></h5>
+                                        <p class="last_message_channel" id="last-message-{{ active_channel.channel_name }}">
+                                            {% if active_channel.last_message %}
+                                            <span class="text-cut">{{ active_channel.last_message }}</span>
+                                            {% else %}
+                                            No messages yet!
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            </a>
+                        {% elif active_channel.User2 == request.user and active_channel.last_message != None %}
+                            <a href="{% url 'room' active_channel.channel_name %}">
+                                {% if active_channel.name == room_name %}
+                                <div class="chat_list active_chat" id="chat-{{ active_channel.channel_name }}">
+                                    {% elif active_channel.last_message_author != request.user and active_channel.read == False %}
+                                    <div class="chat_list new_message_chat" id="chat-{{ active_channel.channel_name }}">
+                                    {% else %}
+                                    <div class="chat_list" id="chat-{{ active_channel.channel_name }}">
+                                        {% endif %}
+                                <div class="chat_people">
+                                    <div class="chat_img"> <img class="img_msg" src="{{ active_channel.User1.profile.profile_picture.url }}" alt="sunil"> </div>
+                                    <div class="chat_ib">
+                                        <h5>{{ active_channel.User1 }}
+                                            <span class="chat_date" id="last-time-{{ active_channel.channel_name }}">
+                                                {% if active_channel.last_message_date %}
+                                                {{ active_channel.last_message_date }}
+                                                {% endif %}
+                                            </span></h5>
+                                        <p class="last_message_channel" id="last-message-{{ active_channel.channel_name }}">
+                                            {% if active_channel.last_message %}
+                                                <span class="text-cut">{{ active_channel.last_message }}</span>
+                                            {% else %}
+                                                No messages yet!
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+<!--            Current Conv Banner-->
+
+            <div class="row convo-banner text-align desktop-hidden-flex">
+
+                <div class="col-1">
+                    <a href="{% url 'private-message' %}">
+                        <i class="fa fa-chevron-left fa-2x" style="color:black"></i>
+                    </a>
+                </div>
+
+                <div class="col-1"></div>
+
+                <div class="col-2">
+                    <img class="img_msg rounded-circle"
+                         src="{{ receiver.profile.profile_picture.url }}"></div>
+
+                <div class="col-6 text-left">{{ receiver.username }}</div>
+
+                <div class="col-2"></div>
+            </div>
+
+<!--            Messages-->
+
+            <div class="mesgs">
+                <div class="msg_history" id="msg_history">
+                    {% if messages %}
+                    {% for message in messages %}
+                        {% if message.author == request.user %}
+                            <div class="outgoing_msg">
+                                <div class="sent_msg">
+                                    <p>{{ message.content }}</p>
+                                    <span class="time_date">{{ message.timestamp }}</span> </div>
+                            </div>
+
+                        {% else %}
+                            <div class="incoming_msg">
+                                <div class="incoming_msg_img"> <img class="img_msg rounded-circle" src="{{ message.author.profile.profile_picture.url }}" alt="sunil"> </div>
+                                <div class="received_msg">
+                                    <div class="received_withd_msg">
+                                        <p>{{ message.content }}</p>
+                                        <span class="time_date">{{ message.timestamp }}</span></div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center">
+                        <img class="rounded-circle avatar" width="200px" height="200px" src="{{ receiver.profile.profile_picture.url }}">
+                    </div>
+                    <div class="text-center">
+                        Send your first message to <b>{{ receiver.username }}</b>
+                    </div>
+
+                    {% endif %}
+
+                    <div id="chat-log"></div>
+
+                    <div class="row type_msg text-align">
+
+                        <div class="col-10 col-sm-10">
+                            <textarea class="write_msg form-control" id="chat-message-input" placeholder="Type a message">
+                            </textarea>
+                        </div>
+
+                        <div class="col-2 col-sm-2 text-align">
+                            <i id="chat-message-submit" class="fa fa-paper-plane fa-2x" style="color:white"></i>
+                        </div>
+
+                    </div>
+
+            </div>
+        </div>
+
+
+
+    <script>
+        window.onload = function() {
+            var scrolling = document.getElementById('msg_history');
+            scrolling.scrollTop = scrolling.scrollHeight - scrolling.clientHeight;
+        };
+
+
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        const roomName = JSON.parse(document.getElementById('room-name').textContent);
+        const sender_username = JSON.parse(document.getElementById('sender').textContent);
+        const receiver_username = JSON.parse(document.getElementById('receiver').textContent);
+
+        const chatSocket = new WebSocket(
+            ws_scheme
+            + '://'
+            + window.location.host
+            + '/ws/chat/'
+            + roomName
+            + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const username = JSON.parse(document.getElementById('user').textContent);
+            if (username == data.user){
+                document.querySelector('#chat-log').innerHTML += '<div class="outgoing_msg">' +
+                '<div class="sent_msg"><p>' + data.message + '</p>' +
+                '<span class="time_date">' + data.timestamp +' </span> </div></div>'
+            }
+            else {
+                document.querySelector('#chat-log').innerHTML += '<div class="incoming_msg">' +
+                '<div class="incoming_msg_img"><img class="img_msg rounded-circle" src="' +
+                data.avatar + '"> </div>' +
+                '<div class="received_msg"><div class="received_withd_msg"><p>' +
+                data.message + '</p><span class="time_date">' +
+                data.timestamp + '</span></div></div></div>'
+            }
+
+            const last_message_update = 'last-message-' + roomName
+            const last_time_update = 'last-time-' + roomName
+            last_message = document.getElementById(last_message_update)
+            last_time = document.getElementById(last_time_update)
+            last_message.innerHTML = data.message
+            last_time.innerHTML = data.timestamp
+
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function(e) {
+            if (e.keyCode === 13) {  // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            messageInputDom.value = '';
+            var last_message_id = 'last-message-' + roomName;
+            last_private_message(sender_username, receiver_username, message, roomName)
+        };
+    </script>
+
+        </div></div></div>
+{% endblock content %}

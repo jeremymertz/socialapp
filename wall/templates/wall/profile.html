@@ -1,0 +1,251 @@
+{% extends "wall/base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+
+        <div class="col-0 col-sm-1 col-md-2"></div>
+        <div class="col-12 col-sm-10 col-md-8 profile-box">
+
+            <div class="row pd-bottom-10">
+
+                <div class="col-1 col-sm-2 col-md-1 col-lg-2"></div>
+
+                <div class="col-5 col-sm-4 col-md-5 col-lg-4 text-center">
+                        <!-- Button Follows -->
+                        <a type="btn" class="btn btn-outline-light btn-lg full-button btn-wrap-text" data-bs-toggle="modal" data-bs-target="#following">
+                            {{ follows.count }} Followings
+                        </a>
+
+                        <!-- Modal Follows -->
+                        <div class="modal fade" id="following" tabindex="-1" aria-labelledby="followingslabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title black" id="followingslabel">{{ user.username }}'s Followings</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% if follows.count >= 1 %}
+                                        {% for follow in follows.all %}
+                                        <div class="row vertical">
+                                            <div class="col-3 col-sm-3">
+                                                <a href="{% url 'Profile' follow %}">
+                                                    <img class="rounded-circle avatar follow-avatars" src="{{ follow.profile.profile_picture.url }}">
+                                                </a>
+                                            </div>
+                                            <div class="col-2 col-sm-2">
+                                                <a href="{% url 'Profile' follow %}"><h4 class=" black avatar-height">{{ follow }}</h4></a>
+                                            </div>
+                                            <div class="col-2 col-sm-2">
+                                            </div>
+                                            <div class="col-5 col-sm-5">
+                                                <a href="{% url 'Profile' follow %}" type="btn" class="btn btn-dark">
+                                                    See Profile
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        {% endfor %}
+                                        {% else %}
+                                        <div class="text-center black"><h3>No follows yet.</h3></div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+
+                <div class="col-5 col-sm-4 col-md-5 col-lg-4 text-center">
+
+                        <!-- Button Followers -->
+                        <a type="btn" class="btn btn-outline-light btn-lg full-button btn-wrap-text " data-bs-toggle="modal" data-bs-target="#followers">
+                            {{ followers.count }} Followers
+                        </a>
+
+                        <!-- Modal Followers -->
+                        <div class="modal fade" id="followers" tabindex="-1" aria-labelledby="followerslabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title black" id="followerslabel">{{ user.username }}'s Followers</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        {% if followers.count >= 1 %}
+                                        {% for follower in followers.all %}
+                                        <div class="row vertical">
+                                            <div class="col-3 col-sm-3">
+                                                <a href="{% url 'Profile' follower %}">
+                                                    <img class="rounded-circle avatar follow-avatars" src="{{ follower.profile.profile_picture.url }}">
+                                                </a>
+                                            </div>
+                                            <div class="col-2 col-sm-2">
+                                                <a href="{% url 'Profile' follower %}"><h4 class=" black avatar-height">{{ follower }}</h4></a>
+                                            </div>
+                                            <div class="col-2 col-sm-2">
+                                            </div>
+                                            <div class="col-5 col-sm-5">
+                                                <a href="{% url 'Profile' follower %}" type="btn" class="btn btn-dark">
+                                                    See Profile
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        {% endfor %}
+                                        {% else %}
+                                        <div class="text-center black"><h3>No followers yet.</h3></div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+
+                <div class="col-1 col-sm-2 col-md-1 col-lg-2"></div>
+            </div>
+
+            <div class="row vertical">
+                <div class="col-sm-3"></div>
+
+                <div class="col-sm-6">
+                    <div class="avatar_p text-center">
+                        <img class="rounded-circle avatar" width="25%"
+                             src="{{ user.profile.profile_picture.url }}">
+                    </div>
+                    <div class="text-center">
+                        <h4>
+                            {{ user.username }}'s Profile
+                            {% if user == request.user %}
+                            <a href="{% url 'Edit_Profile' %}"><i class="fa fa-sliders"></i></a>
+                            {% endif %}
+                        </h4>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 text-center"></div>
+            </div>
+
+            {% if user != request.user %}
+            <div class="row">
+                <div class="col-1 col-sm-1 col-md-1 col-lg-2"></div>
+
+                <div class="col-5 col-sm-5 col-md-5 col-lg-4 text-center">
+                    {% if user in request.user.profile.followings.all %}
+                        <form method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-outline-light btn-lg w-100">Unfollow</button>
+                        </form>
+                    {% else %}
+                        <form method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-outline-light btn-lg w-100">Follow</button>
+                        </form>
+                    {% endif %}
+                </div>
+
+                <div class="col-5 col-sm-5 col-md-5 col-lg-4 text-center ">
+                        <a href="{% url 'room' dm %}">
+                            <button class="btn btn-outline-light btn-lg w-100">Message</button>
+                        </a>
+                    </div>
+                <div class="col-1 col-sm-1 col-md-1 col-lg-2"></div>
+
+            </div>
+            {% endif %}
+
+            {% if user.profile.bio %}
+            <div class="row">
+                <div class="col-1 col-sm-1"></div>
+                <div class="col-10 col-sm-10 text-center bio">
+                    {{ user.profile.bio }}
+                </div>
+                <div class="col-1 col-sm-1"></div>
+            </div>
+            {% endif %}
+    </div>
+       <div class="col-0 col-sm-1 col-md-2"></div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="row">
+        {% if posts %}
+        {% for post in posts %}
+        {% if post.hidden == False %}
+        <div class="col-sm-12 col-md-6 col-lg-4 like-buttons">
+            <div class="post-box">
+                <div class="top-box">
+                    <div class="row no-gutters">
+                        <div class="col-3 col-sm-3 avatar-padding text-center my-auto">
+                            <a href="{% url 'Profile' post.user.username %}">
+                                <img class="rounded-circle avatar" src="{{ post.user.profile.profile_picture.url }}"
+                                     width="60" height="60">
+                            </a>
+                        </div>
+                        <div class="col-3 col-sm-3 my-auto text-left">
+                            <a href="{% url 'Profile' post.user.username %}">
+                                <b>{{ post.user.username }}</b>
+                            </a>
+                        </div>
+                        {% if post.user == request.user %}
+                        <div class="col-4 col-sm-4 my-auto text-center">
+                            <b> {{ post.posted_ago }} </b>
+                        </div>
+                        <div class="col-2 col-sm-2 my-auto text-center">
+
+                            <a href="{% url 'Edit_Post' post.id %}">
+                                <i class="fa fa-sliders"></i>
+                            </a>
+
+                        </div>
+                        {% else %}
+                        <div class="col-6 col-sm-6 my-auto text-center">
+                            <b> {{ post.posted_ago }} </b>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-center middle-box">
+                    <img class="img-fluid min-size" src="{{ post.picture.url }}">
+                </div>
+
+
+                <div class="bottom-box">
+                    <div class="row text-align">
+                        <div class="col-6 col-sm-6 text-center my-auto">
+                            <span id="counter-{{ post.id }}"> <b>{{ post.likes.count }}</b></span>
+                            {% if request.user in post.likes.all %}
+
+                            <span data-post="{{ post.id }}" data-likes="{{ post.likes.count }}" data-url="{% url 'Like' post.id %}?next={{ request.path }}" class="w-100 like-button">
+                                <img class="foo" src="{% static 'wall/images/like.png' %}">
+                            </span>
+
+                            {% else %}
+
+                            <span data-post="{{ post.id }}" data-likes="{{ post.likes.count }}" data-url="{% url 'Like' post.id %}?next={{ request.path }}" class="w-100 like-button">
+                                 <img class="foo" src="{% static 'wall/images/nolike.png' %}"></span>
+
+                            {% endif %}
+
+                        </div>
+                        <div class="col-6 col-sm-6 text-center">
+                            <a href="{% url 'Single_Post' post.id %}">
+                                <i class="fa fa-comments fa-2x"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+
+    </div>
+</div>
+<div class="bottom-space"></div>
+
+{% endblock content %}

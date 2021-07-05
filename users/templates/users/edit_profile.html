@@ -1,0 +1,46 @@
+{% extends "wall/base.html" %}
+{% load static %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<div class="container">
+    <div class="row">
+
+        <div class="col-2 col-sm-2"></div>
+        <div class="col-8 col-sm-8 profile-box">
+            <div class="avatar_p text-center">
+                {% if user.profile.profile_picture %}
+                <img class="rounded-circle avatar" width="15%"
+                     src="{{ user.profile.profile_picture.url }}">
+                {% else %}
+                <img class="rounded-circle avatar" width="15%"
+                     src="">
+                {% endif %}
+            </div>
+            <div class="text-center"><h4>{{ user.username }}'s Profile</h4></div>
+        </div>
+        <div class="col-2 col-sm-2"></div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-sm-12 profile-box-edit">
+            <div class="pd-form">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <img class="img-fluid" src="{{ request.user.profile.profile_picture.url }}">
+                    {{ p_form|crispy }}
+                    {{ u_form|crispy }}
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-dark">Update</button>
+                        </br></br>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+{% endblock content %}

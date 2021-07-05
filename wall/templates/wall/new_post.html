@@ -1,0 +1,66 @@
+{% extends "wall/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+<div class="container pd-top">
+    <div class="row image-upload-box">
+
+        <div class="col-lg-2"></div>
+
+        <div class="col-lg-8">
+            <div class="text-center" id="text-upload"><b>Upload your image (We recommend a minimum size of '400px'*'400px')*</b></div>
+
+            <div id="image_box"></div>
+            <div id="btn-zoom">
+                <div class="btn-group text-center d-flex">
+                    <button type="button" id="zoomin" class="btn btn-settings w-100">
+                      <i class="fa fa-search-plus"></i>
+                    </button>
+                    <button type="button" id="zoomout" class="btn btn-settings w-100">
+                      <i class="fa fa-search-minus"></i>
+                    </button>
+                    <button type="button" id="rotate-left" class="btn btn-settings w-100">
+                        <i class="fa fa-undo"></i>
+                    </button>
+                    <button type="button" id="rotate-right" class="btn btn-settings w-100">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+                <div class="btn-group text-center d-flex">
+                    <button type="button" id="move-left" class="btn btn-settings w-100">
+                        <i class="fa fa-arrow-left"></i>
+                    </button>
+                    <button type="button" id="move-right" class="btn btn-settings w-100">
+                        <i class="fa fa-arrow-right"></i>
+                    </button>
+                    <button type="button" id="move-up" class="btn btn-settings w-100">
+                        <i class="fa fa-arrow-up"></i>
+                    </button>
+                    <button type="button" id="move-down" class="btn btn-settings w-100">
+                        <i class="fa fa-arrow-down"></i>
+                    </button>
+                </div>
+            </div>
+                <form method="POST" enctype='multipart/form-data' id="new_post_form">
+                {% csrf_token %}
+                <div id="file_upload">
+                    <div id="img-input" class="text-center pd-bt">{{ form|crispy }}</div>
+                </div>
+                <div class="form-btn">
+                    <span class="btn btn-danger btn-lg" id="cancel_post">Cancel</span>
+                    <div id="submit-btn">
+                        <input type="submit" class="btn btn-lg btn-dark" value="Next" id="submit_post">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+
+        <div class="col-lg-2"></div>
+
+    </div>
+
+</div>
+<div class="bottom-space"></div>
+
+
+{% endblock content %}

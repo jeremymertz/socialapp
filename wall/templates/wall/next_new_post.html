@@ -1,0 +1,24 @@
+{% extends "wall/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="text-center">
+                <img class="post-box" src="{{ post.picture.url }}">
+            </div>
+        </div>
+        <div class="col-lg-6 pd-top">
+            <form method="POST" enctype='multipart/form-data' id="new_post_form">
+                {% csrf_token %}
+                <div class="text-center">{{ form|crispy }}</div>
+                <input type="submit" class="btn btn-dark" value="Publish" id="submit_post">
+            </form>
+        </div>
+    </div>
+</div>
+<div class="bottom-space"></div>
+
+
+{% endblock content %}

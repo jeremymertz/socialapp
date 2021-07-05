@@ -1,0 +1,84 @@
+{% extends "wall/base.html" %}
+{% block content %}
+{% load static %}
+<div class="container">
+
+    <div class="row">
+        {% if posts %}
+        {% for post in posts %}
+        {% if post.hidden == False %}
+        <div class="col-sm-12 col-md-6 col-lg-4 like-buttons">
+            <div class="post-box">
+                <div class="top-box">
+                    <div class="row no-gutters">
+                        <div class="col-3 col-sm-3 avatar-padding text-center my-auto">
+                            <a href="{% url 'Profile' post.user.username %}">
+                                <img class="rounded-circle avatar" src="{{ post.user.profile.profile_picture.url }}"
+                                     width="60" height="60">
+                            </a>
+                        </div>
+                        <div class="col-3 col-sm-3 my-auto text-left">
+                            <a href="{% url 'Profile' post.user.username %}">
+                                <b>{{ post.user.username }}</b>
+                            </a>
+                        </div>
+                        {% if post.user == request.user %}
+                        <div class="col-4 col-sm-4 my-auto text-center">
+                            <b> {{ post.posted_ago }} </b>
+                        </div>
+                        <div class="col-2 col-sm-2 my-auto text-center">
+
+                            <a href="{% url 'Edit_Post' post.id %}">
+                                <i class="fa fa-sliders"></i>
+                            </a>
+
+                        </div>
+                        {% else %}
+                            <div class="col-6 col-sm-6 my-auto text-center">
+                                <b> {{ post.posted_ago }} </b>
+                            </div>
+                         {% endif %}
+                    </div>
+                </div>
+                <div class="text-center middle-box">
+                    <img class="img-fluid min-size" src="{{ post.picture.url }}">
+                </div>
+
+
+                <div class="bottom-box">
+                    <div class="row text-align">
+                        <div class="col-6 col-sm-6 text-center my-auto">
+                            <span id="counter-{{ post.id }}"> <b>{{ post.likes.count }}</b></span>
+                            {% if request.user in post.likes.all %}
+
+                            <span data-post="{{ post.id }}" data-likes="{{ post.likes.count }}" data-url="{% url 'Like' post.id %}?next={{ request.path }}" class="w-100 like-button">
+                                <img class="foo" src="{% static 'wall/images/like.png' %}">
+                            </span>
+
+                            {% else %}
+
+                            <span data-post="{{ post.id }}" data-likes="{{ post.likes.count }}" data-url="{% url 'Like' post.id %}?next={{ request.path }}" class="w-100 like-button">
+                                 <img class="foo" src="{% static 'wall/images/nolike.png' %}"></span>
+
+                            {% endif %}
+
+                        </div>
+                        <div class="col-6 col-sm-6 text-center">
+                            <a href="{% url 'Single_Post' post.id %}">
+                                <i class="fa fa-comments fa-2x"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+
+    </div>
+
+</div>
+<div class="bottom-space"></div>
+
+{% endblock content %}

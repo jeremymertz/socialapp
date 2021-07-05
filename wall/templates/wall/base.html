@@ -1,0 +1,280 @@
+{% load static %}
+{{ request.user.username|json_script:"user" }}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.css" integrity="sha512-NCJ1O5tCMq4DK670CblvRiob3bb5PAxJ7MALAz2cV40T9RgNMrJSAwJKy0oz20Wu7TDn9Z2WnveirOeHmpaIlA==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'wall/style.css' %}">
+    <title>Hello, world!</title>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="https://social-impaxt.herokuapp.com/"><img src="{% static 'wall/images/logow.png' %}" height="60px"></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <div class="navbar-nav">
+                <a href="https://social-impaxt.herokuapp.com/" class="btn-own">Home</a>
+            </div>
+            <div class="navbar-nav">
+                <a href="{% url 'popular' %}" class="btn-own">Most Popular</a>
+            </div>
+            <div class="navbar-nav desktop-hidden">
+                <a href="{% url 'logout' %}" class="btn-own">Logout</a>
+            </div>
+
+
+            {% if request.user.is_authenticated %}
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 text-align mobile-hidden">
+
+                <li class="nav-brand">
+                    <a href="{% url 'private-message' %}" class="white-txt pd" id="message-box">
+                        {% if new_message == True %}
+                            <img id="mailimg" src="{% static 'wall/images/newmail.png' %}">
+                        {% else %}
+                            <img id="mailimg" src="{% static 'wall/images/mail.png' %}">
+                        {% endif %}
+
+                    </a>
+                </li>
+
+                <li class="nav-brand pd-icon">
+                    <div class="dropdown" id="notification-click">
+                        <span id="notification"></span>
+                        <a href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                            <img src="{% static 'wall/images/notification.png' %}">
+                        </a>
+
+                        <ul class="dropdown-menu" id="notification-menu" aria-labelledby="dropdownMenuLink">
+
+                            <div class="row no-gutters marker">
+                                <div class="col-sm-7">
+                                </div>
+                                <div class="col-sm-5">
+                                    <span class="text-white" id="read_notification" data-url="{% url 'Notification_read' %}"> Mark all as read
+                                    </span>
+                                </div>
+                            </div>
+
+                            {% if notifications %}
+                            {% for notification in notifications %}
+                            {% if notification.user_sending != request.user %}
+                            {% if notification.read == False %}
+                                <script>
+                                    document.getElementById('notification').classList.add("red-dot");
+                                </script>
+                            {% endif %}
+
+                            <li> <span class="dropdown-item-text">
+                                    <div class="card" style="width: 18rem;">
+                                        <div class="card-body">
+
+                                            <p class="card-text">
+                                                <div class="row">
+                                                    <div class="col-sm-3">
+                                                        <a href="{{ notification.user_sending.profile.get_absolute_url}}">
+                                                        <img class="rounded-circle avatar"
+                                                             src="{{ notification.user_sending.profile.profile_picture.url }}"
+                                                             width="45" height="45">
+                                                        </a>
+                                                    </div>
+                                                    {% if notification.post %}
+                                                    <div class="col-sm-6 no-padding">
+                                                        <a href="{{ notification.user_sending.profile.get_absolute_url }}"><b>{{ notification.user_sending.username }}</b></a>
+                                                        <a href="{{ notification.post.get_absolute_url}}">{{ notification.message }}</a>
+                                                    </div>
+                                                    <div class="col-sm-3">
+                                                        <a href="{{ notification.post.get_absolute_url}}">
+                                                            <img class="thumbnail" src="{{ notification.post.picture.url }}">
+                                                        </a>
+                                                    </div>
+                                                    {% else %}
+                                                    <div class="col-sm-9">
+                                                        <a href="{{ notification.user_sending.profile.get_absolute_url }}"><b>{{ notification.user_sending.username }}</b></a>
+                                                        <a href="{{ notification.post.get_absolute_url}}">{{ notification.message }}</a>
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </span>
+                            </li>
+                                {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="dropdown-item">
+                                    <span class="pd text-white" id="no-notification">No notification yet</span>
+                                </li>
+                        </ul>
+                            {% endif %}
+                    </div>
+                </li>
+
+                <li class="nav-brand pd-icon">
+                    <a href="{% url 'Profile' request.user %}">
+                        <img class="rounded-circle avatar" src="{{ request.user.profile.profile_picture.url }}"
+                         width="45" height="45">
+                    </a>
+                </li>
+                <li class="nav-link item">
+                    <a href="{% url 'logout' %}">
+                        <span class="white-txt">Logout</span>
+                    </a>
+                </li>
+                <li class="nav-link item">
+                    <a href="{% url 'New_Post' %}">
+                        <img src="{% static 'wall/images/add_post.png' %}">
+                    </a>
+                </li>
+                {% else %}
+                <li class="nav-link item">
+                    <a href="{% url 'register' %}">
+                        <span class="white-txt pd">Register</span>
+                    </a>
+                </li>
+                <li class="nav-link item">
+                    <a href="{% url 'login' %}">
+                        <span class="white-txt pd">Login</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+
+        </div>
+    </div>
+</nav>
+
+{% block content %} {% endblock %}
+
+<div class="footer-menu desktop-hidden">
+  <div class="row text-center text-align">
+
+      <div class="col-3">
+          <a href="{% url 'private-message' %}" class="white-txt pd" id="message-box">
+            {% if new_message == True %}
+                <img id="mailimg" src="{% static 'wall/images/newmail.png' %}">
+            {% else %}
+                <img id="mailimg" src="{% static 'wall/images/mail.png' %}">
+            {% endif %}
+        </a>
+      </div>
+
+      <div class="col-3">
+          <div class="dropdown" id="notification-click">
+                <span id="notification"></span>
+                <a href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if request.user.profile.profile_picture %}
+                    <img src="{% static 'wall/images/notification.png' %}"
+                         width="45" height="45">
+                    {% else %}
+                    <img class="rounded-circle avatar" src=""
+                         width="45" height="45">
+                    {% endif %}
+
+                </a>
+
+                <ul class="dropdown-menu" id="notification-menu" aria-labelledby="dropdownMenuLink">
+
+                    <div class="row no-gutters marker">
+                        <div class="col-sm-7">
+                        </div>
+                        <div class="col-sm-5">
+                            <span class="text-white" id="read_notification" data-url="{% url 'Notification_read' %}">
+                                Mark all as read
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if notifications %}
+                    {% for notification in notifications %}
+                    {% if notification.user_sending != request.user %}
+                    {% if notification.read == False %}
+                        <script>
+                            document.getElementById('notification').classList.add("red-dot");
+                        </script>
+                    {% endif %}
+
+                    <li> <span class="dropdown-item-text">
+                            <div class="card" style="width: 18rem;">
+                                <div class="card-body">
+
+                                    <p class="card-text">
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                <a href="{{ notification.user_sending.profile.get_absolute_url}}">
+                                                <img class="rounded-circle avatar"
+                                                     src="{{ notification.user_sending.profile.profile_picture.url }}"
+                                                     width="45" height="45">
+                                                </a>
+                                            </div>
+                                            {% if notification.post %}
+                                            <div class="col-sm-6 no-padding">
+                                                <a href="{{ notification.user_sending.profile.get_absolute_url }}"><b>{{ notification.user_sending.username }}</b></a>
+                                                <a href="{{ notification.post.get_absolute_url}}">{{ notification.message }}</a>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <a href="{{ notification.post.get_absolute_url}}">
+                                                    <img class="thumbnail" src="{{ notification.post.picture.url }}">
+                                                </a>
+                                            </div>
+                                            {% else %}
+                                            <div class="col-sm-9">
+                                                <a href="{{ notification.user_sending.profile.get_absolute_url }}"><b>{{ notification.user_sending.username }}</b></a>
+                                                <a href="{{ notification.post.get_absolute_url}}">{{ notification.message }}</a>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </p>
+                                </div>
+                            </div>
+                        </span>
+                    </li>
+                        {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <li class="dropdown-item">
+                            <span class="pd text-white" id="no-notification">No notification yet</span>
+                        </li>
+                </ul>
+                    {% endif %}
+            </div>
+      </div>
+
+      <div class="col-3">
+          <a href="{% url 'New_Post' %}">
+            <img src="{% static 'wall/images/add_post.png' %}">
+          </a>
+      </div>
+
+      <div class="col-3">
+          <a href="{% url 'Profile' request.user %}">
+              <img class="rounded-circle avatar" src="{{ request.user.profile.profile_picture.url }}"
+                         width="45" height="45">
+          </a>
+      </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.11/cropper.min.js" integrity="sha512-FHa4dxvEkSR0LOFH/iFH0iSqlYHf/iTwLc5Ws/1Su1W90X0qnxFxciJimoue/zyOA/+Qz/XQmmKqjbubAAzpkA==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cropper/1.0.1/jquery-cropper.js" integrity="sha512-7H4tikIFoyAdYD31w/uNYvvAUL6gyunWXLwTQ7ZXkyjD+brw+PfJpLxFkANnbkKnSJzU89YpnF3fJKbpvV+QYg==" crossorigin="anonymous"></script>
+<script src="{% static 'wall/script.js' %}"></script>
+<script src="{% static 'wall/comments.js' %}"></script>
+<script src="{% static 'wall/sockets.js' %}"></script>
+</body>
+</html>
+

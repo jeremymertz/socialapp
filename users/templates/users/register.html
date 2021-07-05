@@ -1,0 +1,39 @@
+{% extends "wall/basenobar.html" %}
+{% load static %}
+{% block content %}
+{% load crispy_forms_tags %}
+
+
+<div class="login-background">
+<div class="container register-pd">
+    <div class="row">
+        <div class="col-sm-1"></div>
+
+        <div class="col-sm-4">
+        </div>
+
+        <div class="col-sm-2"></div>
+
+        <div class="col-sm-4 login-box">
+            <div class="text-center logo-padding">
+                <img src="{% static 'wall/images/logo.png' %}" height="60px">
+            </div>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="form-group">
+                    <div class="text-center">
+                    <button type="submit" class="btn btn-dark">Register</button>
+                        </div>
+                </div>
+            </form>
+            <small class="register-txt">Already have an account yet? <b><a href="{% url 'login' %}">Login here!</a></b></small>
+        </div>
+
+        <div class="col-sm-1">
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock content %}

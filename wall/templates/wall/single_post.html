@@ -1,0 +1,327 @@
+{% extends "wall/base.html" %}
+{% block content %}
+{% load crispy_forms_tags %}
+{% load static %}
+<div class="container">
+
+    <div class="row no-gutters">
+        {% if post %}
+        {% if post.hidden == False %}
+        <div class="col-lg-5 like-buttons">
+            <div class="post-box">
+                <div class="top-box">
+                    <div class="row no-gutters">
+                        <div class="col-3 col-sm-3 avatar-padding text-center my-auto">
+                            <a href="{% url 'Profile' post.user.username %}">
+                                <img class="rounded-circle avatar" src="{{ post.user.profile.profile_picture.url }}"
+                                     width="60" height="60">
+                            </a>
+                        </div>
+                        <div class="col-3 col-sm-3 my-auto text-left">
+                            <a href="{% url 'Profile' post.user.username %}">
+                                <b>{{ post.user.username }}</b>
+                            </a>
+                        </div>
+                        {% if post.user == request.user %}
+                        <div class="col-4 col-sm-4 my-auto text-center">
+                            <b> {{ post.posted_ago }} </b>
+                        </div>
+                        <div class="col-2 col-sm-2 my-auto text-center">
+
+                            <a href="{% url 'Edit_Post' post.id %}">
+                                <i class="fa fa-sliders"></i>
+                            </a>
+
+                        </div>
+                        {% else %}
+                        <div class="col-6 col-sm-6 my-auto text-center">
+                            <b> {{ post.posted_ago }} </b>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="text-center middle-box">
+                    <img class="img-fluid" src="{{ post.picture.url }}">
+                </div>
+
+                <div class="content-box">
+                    <b>{{post.user}}</b> {{ post.content }}
+                </div>
+
+
+                <div class="bottom-box">
+                    <div class="row text-align">
+                        <div class="col-6 col-sm-6 text-center my-auto">
+                            <span id="counter-{{ post.id }}"> <b>{{ post.likes.count }}</b></span>
+                            {% if request.user in post.likes.all %}
+
+                            <span data-post="{{ post.id }}" data-likes="{{ post.likes.count }}" data-url="{% url 'Like' post.id %}?next={{ request.path }}" class="w-100 like-button">
+                                <img class="foo" src="{% static 'wall/images/like.png' %}">
+                            </span>
+
+                            {% else %}
+
+                            <span data-post="{{ post.id }}" data-likes="{{ post.likes.count }}" data-url="{% url 'Like' post.id %}?next={{ request.path }}" class="w-100 like-button">
+                                 <img class="foo" src="{% static 'wall/images/nolike.png' %}"></span>
+
+                            {% endif %}
+
+                        </div>
+                        <div class="col-6 col-sm-6 text-center">
+                            <a href="{% url 'Single_Post' post.id %}">
+                                <i class="fa fa-comments fa-2x"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+
+<!--        Post content-->
+
+
+
+
+        <div class="col-lg-7" id="comment_replies">
+            <div class="pd-top">
+
+                <!--New comment form-->
+                <div class="comment-form" id="comment-form">
+                    <form class="needs-validation" method="POST" enctype='multipart/form-data' id="new_comment_form">
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <a href="{% url 'Profile' request.user.username %}" id="profile">
+                                    <img class="rounded-circle avatar mx-auto" id="my_avatar" src="{{ request.user.profile.profile_picture.url }}"
+                                         width="30" height="30">
+                                    </a>
+                                </div>
+                            </div>
+                            <input type="text" id="new_comment_content" onkeyup="typing_comment()" class="form-control" placeholder="Leave your comment here..." required>
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <span class="btn" id="submit_new_comment_off">Post</span>
+                                    <button class="btn" type="submit" data-url="{% url 'Comment' post.id %}" id="submit_new_comment_on">Post</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div id="new_comments"></div>
+
+<!--Comments-->
+            {% if comments %}
+            {% for comment in comments %}
+            <div class="comments-container">
+
+                <div class="comments comment-main-level">
+                    <!-- Avatar -->
+                    <div class="comment-avatar">
+                        <a href="{% url 'Profile' comment.user.username %}">
+                        <img class="rounded-circle avatar follow-avatars" src="{{ comment.user.profile.profile_picture.url }}">
+                        </a>
+                    </div>
+                    <!-- Comment -->
+                    <div class="comment-box">
+                        <div class="comment-head">
+                            {% if post.user == comment.user %}
+                            <h6 class="comment-name by-author"><a href="{% url 'Profile' comment.user.username %}">{{ comment.user.username }}</a></h6>
+                            {% else %}
+                            <h6 class="comment-name"><a href="{% url 'Profile' comment.user.username %}">{{ comment.user.username }}</a></h6>
+                            {% endif %}
+                            <span>{{ comment.posted_ago }}</span>
+
+
+                            {% if request.user == comment.user %}
+                            <!-- Button Delete Comment -->
+                            <i class="fa fa-trash" data-bs-toggle="modal" data-bs-target="#delete_comment-{{ comment.id }}">
+                            </i>
+
+                            <!-- Modal Delete Comment -->
+                            <div class="modal fade" id="delete_comment-{{ comment.id }}" tabindex="-1" aria-labelledby="delete_comment_label-{{ comment.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title black" id="delete_comment_label-{{ comment.id }}">Delete Comment</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete your comment?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <a class="btn btn-danger" href="{% url 'Delete_comment' comment.id %}">Delete Comment</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="comment-content">
+                            {{ comment.content }}
+                        </div>
+
+                        <div class="comment-head">
+                            <div class="arrows">
+                                <i class="fa fa-reply" id="reply"  data-post="{{ comment.id }}"></i>
+                                {% if request.user in comment.unlike.all %}
+                                <i class="like_arrow_down fa fa-arrow-down" style="color:tomato;"
+                                   data-url="{% url 'Unlike_Comment' comment.id %}" data-id="{{ comment.id }}" id="down-{{ comment.id }}">
+                                </i>
+                                {% else %}
+                                <i class="like_arrow_down fa fa-arrow-down" data-url="{% url 'Unlike_Comment' comment.id %}"
+                                   data-id="{{ comment.id }}" id="down-{{ comment.id }}">
+                                </i>
+                                {% endif %}
+
+                                {% if request.user in comment.like.all %}
+                                <i class="like_arrow_up fa fa-arrow-up" style="color:#304c75;"
+                                   data-url="{% url 'Like_Comment' comment.id %}" data-id="{{ comment.id }}" id="up-{{ comment.id }}">
+                                </i>
+                                {% else %}
+                                <i class="like_arrow_up fa fa-arrow-up" data-url="{% url 'Like_Comment' comment.id %}"
+                                   data-id="{{ comment.id }}" id="up-{{ comment.id }}">
+                                </i>
+                                {% endif %}
+
+                                <i id="clcounter-{{ comment.id }}" data-ratio="{{ comment.ratio }}">
+                                    {{ comment.ratio }}
+                                </i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!--New Reply form-->
+                <div class="reply-form" id="comment-{{ comment.id }}">
+                    <form method="POST" enctype='multipart/form-data' id="reply_form-{{ comment.id }}">
+
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <img class="rounded-circle avatar mx-auto" src="{{ request.user.profile.profile_picture.url }}"
+                                         width="30" height="30">
+                                </div>
+                            </div>
+                            <input type="text" id="text-{{ comment.id }}" onkeyup="typing_reply({{comment.id}})" class="form-control" placeholder="Leave your reply here..." required>
+                            <div class="input-group-prepend">
+                                <div class="input-group-text">
+                                    <span class="btn" id="no-submit-{{ comment.id }}">Post</span>
+                                    <button class="btn submit_new_reply_on" type="submit" data-url="{% url 'Reply' post.id %}" value="Post" id="submit-{{ comment.id }}">Post</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                {% for reply in replies %}
+                {% if reply.parent == comment %}
+                    <div class="comments replies comment-main-level">
+                    <!-- Avatar -->
+                    <div class="comment-avatar">
+                        <a href="{% url 'Profile' reply.user.username %}">
+                        <img class="rounded-circle avatar follow-avatars" src="{{ reply.user.profile.profile_picture.url }}">
+                        </a>
+                    </div>
+                    <!-- Comment -->
+                    <div class="comment-box">
+                        <div class="comment-head">
+                            {% if post.user == reply.user %}
+                            <h6 class="comment-name by-author"><a href="{% url 'Profile' reply.user.username %}">{{ reply.user.username }}</a></h6>
+                            {% else %}
+                            <h6 class="comment-name"><a href="{% url 'Profile' reply.user.username %}">{{ reply.user.username }}</a></h6>
+                            {% endif %}
+                            <span>{{ reply.posted_ago }}</span>
+
+                            {% if request.user == reply.user %}
+                            <!-- Button Delete Comment -->
+                            <i class="fa fa-trash" data-bs-toggle="modal" data-bs-target="#delete_reply-{{ reply.id }}">
+                            </i>
+
+                            <!-- Modal Delete Comment -->
+                            <div class="modal fade" id="delete_reply-{{ reply.id }}" tabindex="-1" aria-labelledby="delete_reply_label-{{ reply.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title black" id="delete_reply_label-{{ reply.id }}">Delete Comment</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            Are you sure you want to delete your comment?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <a class="btn btn-danger" href="{% url 'Delete_reply' reply.id %}">Delete Comment</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="comment-content">
+                            {{ reply.content }}
+                        </div>
+                        <div class="comment-head">
+                            <div class="arrows">
+                                {% if request.user in reply.unlike.all %}
+                                <i class="like_arrow_down fa fa-arrow-down" style="color:tomato;"
+                                   data-url="{% url 'Unlike_Comment' reply.id %}" data-id="{{ reply.id }}" id="down-{{ reply.id }}">
+                                </i>
+                                {% else %}
+                                <i class="like_arrow_down fa fa-arrow-down" data-url="{% url 'Unlike_Comment' reply.id %}"
+                                   data-id="{{ reply.id }}" id="down-{{ reply.id }}">
+                                </i>
+                                {% endif %}
+
+                                {% if request.user in reply.like.all %}
+                                <i class="like_arrow_up fa fa-arrow-up" style="color:#304c75;"
+                                   data-url="{% url 'Like_Comment' reply.id %}" data-id="{{ reply.id }}" id="up-{{ reply.id }}">
+                                </i>
+                                {% else %}
+                                <i class="like_arrow_up fa fa-arrow-up" data-url="{% url 'Like_Comment' reply.id %}"
+                                   data-id="{{ reply.id }}" id="up-{{ reply.id }}">
+                                </i>
+                                {% endif %}
+
+                                <i id="clcounter-{{ reply.id }}" data-ratio="{{ reply.ratio }}">
+                                    {{ reply.ratio }}
+                                </i>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+
+                {% endfor %}
+                {% endif %}
+
+
+
+        </div>
+
+        </div>
+    </div>
+
+
+</div>
+<div class="bottom-space"></div>
+<script>
+   var up_off = "{% static 'wall/images/upoff.png' %}"
+   var down_off = "{% static 'wall/images/downoff.png' %}"
+</script>
+
+{% endblock content %}
